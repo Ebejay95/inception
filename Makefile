@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jeberle <jeberle@student.42.fr>            +#+  +:+       +#+         #
+#    By: jonathaneberle <jonathaneberle@student.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 15:44:57 by jeberle           #+#    #+#              #
-#    Updated: 2024/11/12 16:01:57 by jeberle          ###   ########.fr        #
+#    Updated: 2024/11/18 00:34:42 by jonathanebe      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -70,8 +70,12 @@ DOCKER_COMPOSE = srcs/docker-compose.yml
 all: setup build
 
 setup:
-	@mkdir -p /home/$(USER)/data/wordpress
-	@mkdir -p /home/$(USER)/data/mariadb
+	@mkdir -p ./data/wordpress
+	@mkdir -p ./data/mariadb
+	@mkdir -p ./secrets/
+	@touch secrets/db_password.txt
+	@touch secrets/db_root_password.txt
+	@touch secrets/wp_password.txt
 
 build:
 	@docker-compose -f $(DOCKER_COMPOSE) up --build -d
@@ -81,8 +85,8 @@ down:
 
 clean: down
 	@docker system prune -a
-	@sudo rm -rf /home/$(USER)/data/wordpress/*
-	@sudo rm -rf /home/$(USER)/data/mariadb/*
+	@sudo rm -rf ./data/wordpress/*
+	@sudo rm -rf ./data/mariadb/*
 
 fclean: clean
 	@docker volume rm $$(docker volume ls -q)
