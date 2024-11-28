@@ -79,7 +79,7 @@ Code kopieren
    git clone <repository_url>
    cd inception
 ```
-   
+
 ### Set Up Environment Variables: Edit .env with your domain and credentials:
 
 ```
@@ -131,3 +131,14 @@ Automate tasks and enforce best practices.
 Deploy web servers and databases in containers.
 
 Inception – Dockerize your way into system administration excellence! 🚀
+
+
+```
+secrets:
+
+secrets/db_password.txt           secureDBpass123!
+secrets/db_root_password.txt      rootSecurePass456!
+secrets/wp_password.txt           superSecureWPpass789!
+```
+
+
