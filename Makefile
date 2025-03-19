@@ -6,7 +6,7 @@
 #    By: jonathaneberle <jonathaneberle@student.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 15:44:57 by jeberle           #+#    #+#              #
-#    Updated: 2025/03/19 10:17:40 by jonathanebe      ###   ########.fr        #
+#    Updated: 2025/03/19 13:08:47 by jonathanebe      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,7 +33,7 @@ $(X)\n\
 █  █   █ █  █        █        █           █     █  █     █  █   █ █ $(X)\n\
 █  █    ██  ███████  ███████  █           █     █  ███████  █    ██ $(X)\n\
 $(X)\n\
-$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)\n\
+$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)\n\
 #------------------------------------------------------------------------------#
 #--------------                      GENERAL                      -------------#
 #------------------------------------------------------------------------------#
@@ -41,15 +41,7 @@ $(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█
 NAME=inception
 DOCKER_COMPOSE = srcs/docker-compose.yml
 
-# Detect OS and set data directories accordingly
-UNAME := $(shell uname)
-ifeq ($(UNAME), Darwin)
-    # macOS paths
-    DATA_DIR = $(shell pwd)/data
-else
-    # Linux paths
-    DATA_DIR = /home/$(USER)/data
-endif
+DATA_DIR = ./data/
 
 WP_DATA_DIR = $(DATA_DIR)/wordpress
 DB_DATA_DIR = $(DATA_DIR)/mariadb
@@ -102,20 +94,20 @@ up:
 
 down:
 	@echo "$(BLUE)Stopping containers...$(X)"
-	@docker-compose -f $(DOCKER_COMPOSE) down
+	@DATA_DIR=$(DATA_DIR) docker-compose -f $(DOCKER_COMPOSE) down
 	@echo "$(GREEN)Containers stopped.$(X)"
 
 ps:
 	@echo "$(BLUE)List of running containers:$(X)"
-	@docker-compose -f $(DOCKER_COMPOSE) ps
+	@DATA_DIR=$(DATA_DIR) docker-compose -f $(DOCKER_COMPOSE) ps
 
 logs:
 	@echo "$(BLUE)Showing logs:$(X)"
-	@docker-compose -f $(DOCKER_COMPOSE) logs
+	@DATA_DIR=$(DATA_DIR) docker-compose -f $(DOCKER_COMPOSE) logs
 
 logs-%:
 	@echo "$(BLUE)Showing logs for $*:$(X)"
-	@docker-compose -f $(DOCKER_COMPOSE) logs $*
+	@DATA_DIR=$(DATA_DIR) docker-compose -f $(DOCKER_COMPOSE) logs $*
 
 status:
 	@echo "$(BLUE)Checking status:$(X)"
@@ -142,12 +134,12 @@ re: fclean all
 
 restart:
 	@echo "$(BLUE)Restarting containers...$(X)"
-	@docker-compose -f $(DOCKER_COMPOSE) restart
+	@DATA_DIR=$(DATA_DIR) docker-compose -f $(DOCKER_COMPOSE) restart
 	@echo "$(GREEN)Containers restarted.$(X)"
 
 stop:
 	@echo "$(BLUE)Stopping containers...$(X)"
-	@docker-compose -f $(DOCKER_COMPOSE) stop
+	@DATA_DIR=$(DATA_DIR) docker-compose -f $(DOCKER_COMPOSE) stop
 	@echo "$(GREEN)Containers stopped.$(X)"
 
 prune:
