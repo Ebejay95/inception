@@ -6,7 +6,7 @@
 #    By: jonathaneberle <jonathaneberle@student.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 15:44:57 by jeberle           #+#    #+#              #
-#    Updated: 2025/03/19 10:06:01 by jonathanebe      ###   ########.fr        #
+#    Updated: 2025/03/19 10:17:40 by jonathanebe      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -40,7 +40,17 @@ $(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█
 
 NAME=inception
 DOCKER_COMPOSE = srcs/docker-compose.yml
-DATA_DIR = /home/$(USER)/data
+
+# Detect OS and set data directories accordingly
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+    # macOS paths
+    DATA_DIR = $(shell pwd)/data
+else
+    # Linux paths
+    DATA_DIR = /home/$(USER)/data
+endif
+
 WP_DATA_DIR = $(DATA_DIR)/wordpress
 DB_DATA_DIR = $(DATA_DIR)/mariadb
 
@@ -78,7 +88,7 @@ prepare:
 	@echo "$(BLUE)Creating data directories...$(X)"
 	@mkdir -p $(WP_DATA_DIR)
 	@mkdir -p $(DB_DATA_DIR)
-	@echo "$(GREEN)Data directories created.$(X)"
+	@echo "$(GREEN)Data directories created at $(DATA_DIR)$(X)"
 
 build:
 	@echo "$(BLUE)Building Docker containers...$(X)"
@@ -119,8 +129,8 @@ clean: down
 	@echo "$(BLUE)Cleaning Docker system...$(X)"
 	@docker system prune -a --force
 	@echo "$(BLUE)Removing data...$(X)"
-	@sudo rm -rf $(WP_DATA_DIR)/*
-	@sudo rm -rf $(DB_DATA_DIR)/*
+	@rm -rf $(WP_DATA_DIR)/*
+	@rm -rf $(DB_DATA_DIR)/*
 	@echo "$(GREEN)Clean complete.$(X)"
 
 fclean: clean
@@ -162,11 +172,13 @@ images:
 info:
 	@echo "$(CYAN)INCEPTION PROJECT INFO:$(X)"
 	@echo "$(BLUE)Container statuses:$(X)"
-	@docker ps -a | grep -E 'nginx|wordpress|mariadb'
+	@docker ps -a | grep -E 'nginx|wordpress|mariadb' || echo "No containers running"
 	@echo "\n$(BLUE)Volumes:$(X)"
 	@docker volume ls
 	@echo "\n$(BLUE)Networks:$(X)"
-	@docker network ls | grep inception
+	@docker network ls | grep inception || echo "No inception networks found"
+	@echo "\n$(BLUE)Data directory:$(X)"
+	@echo "$(DATA_DIR)"
 
 check-env:
 	@echo "$(BLUE)Checking environment files...$(X)"
