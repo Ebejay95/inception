@@ -4,7 +4,13 @@ while ! mysqladmin ping -h mariadb --silent; do
     sleep 1
 done
 
-if [ ! -f /var/www/html/wp-config.php ]; then
+if [ ! -f /var/www/html/wp-config.php ] && [ ! -f /var/www/html/index.php ]; then
+    echo "WordPress files not found. Downloading WordPress..."
+    cd /var/www/html
+    wp core download --allow-root
+
+    chown -R www-data:www-data /var/www/html
+
     wp config create --allow-root \
         --dbname=${MYSQL_DATABASE} \
         --dbuser=${MYSQL_USER} \
