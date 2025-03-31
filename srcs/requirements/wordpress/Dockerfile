@@ -1,12 +1,20 @@
-FROM debian:buster
+FROM debian:bullseye
 
 RUN apt-get update && apt-get install -y \
-	php7.3-fpm \
-	php7.3-mysql \
+	php7.4-fpm \
+	php7.4-mysql \
+	wget \
+	curl \
+	mariadb-client
 
-COPY conf/www.conf /etc/php/7.3/fpm/pool.d/
-COPY tools/wp-setup.sh /usr/local/bin/
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+	&& chmod +x wp-cli.phar \
+	&& mv wp-cli.phar /usr/local/bin/wp
 
-EXPOSE 9000
+RUN mkdir -p /run/php
+COPY ./conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
 
-CMD ["php-fpm7.3", "-F"]
+COPY ./tools/wp-config.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/wp-config.sh
+
+CMD ["/usr/local/bin/wp-config.sh"]

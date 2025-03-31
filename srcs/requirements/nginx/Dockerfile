@@ -1,20 +1,14 @@
-# requirements/nginx/Dockerfile
-FROM debian:buster
+FROM debian:bullseye
 
-RUN apt-get update && apt-get install -y \
-    nginx \
-    openssl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y nginx openssl
 
-# SSL setup script
-COPY tools/ssl_setup.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/ssl_setup.sh
+RUN mkdir -p /etc/nginx/ssl
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+	-keyout /etc/nginx/ssl/nginx.key \
+	-out /etc/nginx/ssl/nginx.crt \
+	-subj "/C=XX/ST=State/L=City/O=Organization/OU=Unit/CN=jeberle.42.fr"
 
-# NGINX configuration
-COPY conf/nginx.conf /etc/nginx/conf.d/default.conf
-
-# Generate SSL certificate
-RUN /usr/local/bin/ssl_setup.sh
+COPY ./conf/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 443
 

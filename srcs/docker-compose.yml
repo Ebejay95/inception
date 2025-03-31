@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 secrets:
   db_password:
     file: ./secrets/db_password.txt
@@ -5,19 +6,40 @@ secrets:
     file: ./secrets/db_root_password.txt
   wp_password:
     file: ./secrets/wp_password.txt
+=======
+version: '3'
+>>>>>>> 299f4311ae3fd1066c2b3e3b5ccff4e824419bce
 
 services:
   nginx:
     build:
       context: ./requirements/nginx
-      dockerfile: Dockerfile
     container_name: nginx
     ports:
       - "443:443"
+    volumes:
+      - ./data/wordpress:/var/www/html
     networks:
       - inception_network
+    depends_on:
+      - wordpress
     restart: always
 
+  wordpress:
+    build:
+      context: ./requirements/wordpress
+    container_name: wordpress
+    volumes:
+      - ./data/wordpress:/var/www/html
+    networks:
+      - inception_network
+    depends_on:
+      - mariadb
+    env_file:
+      - .env
+    restart: always
+
+<<<<<<< HEAD
   wordpress:
     build:
       context: ./requirements/wordpress
@@ -56,6 +78,24 @@ volumes:
       type: none
       o: bind
       device: ./requirements/mariadb/data
+=======
+  mariadb:
+    build:
+      context: ./requirements/mariadb
+    container_name: mariadb
+    volumes:
+      - ./data/mariadb:/var/lib/mysql
+    networks:
+      - inception_network
+    env_file:
+      - .env
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+>>>>>>> 299f4311ae3fd1066c2b3e3b5ccff4e824419bce
 
 networks:
   inception_network:
