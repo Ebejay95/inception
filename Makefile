@@ -6,7 +6,7 @@
 #    By: jonathaneberle <jonathaneberle@student.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 15:44:57 by jeberle           #+#    #+#              #
-#    Updated: 2025/03/19 13:08:47 by jonathanebe      ###   ########.fr        #
+#    Updated: 2025/03/30 17:00:58 by jonathanebe      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,7 +33,7 @@ $(X)\n\
 █  █   █ █  █        █        █           █     █  █     █  █   █ █ $(X)\n\
 █  █    ██  ███████  ███████  █           █     █  ███████  █    ██ $(X)\n\
 $(X)\n\
-$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)\n\
+$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)\n\
 #------------------------------------------------------------------------------#
 #--------------                      GENERAL                      -------------#
 #------------------------------------------------------------------------------#
@@ -41,7 +41,7 @@ $(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█
 NAME=inception
 DOCKER_COMPOSE = srcs/docker-compose.yml
 
-DATA_DIR = ./data/
+DATA_DIR = ./srcs/data/
 
 WP_DATA_DIR = $(DATA_DIR)/wordpress
 DB_DATA_DIR = $(DATA_DIR)/mariadb
@@ -70,7 +70,7 @@ DB_DATA_DIR = $(DATA_DIR)/mariadb
 #--------------                      COMPILE                      -------------#
 #------------------------------------------------------------------------------#
 
-.PHONY: all setup prepare build up down ps logs status clean fclean re restart stop prune volumes images info check-env
+.PHONY: all setup prepare build up down ps logs status clean fclean re restart stop prune volumes images info check-env deepclean cleandata
 
 all: prepare build up
 	@echo "$(GREEN)$(SUCCESS)$(X)"
@@ -117,13 +117,28 @@ status:
 	@echo "\n$(BLUE)Volumes:$(X)"
 	@docker volume ls
 
+cleandata:
+	@echo "$(BLUE)Removing data and recreating empty directories...$(X)"
+	@rm -rf $(WP_DATA_DIR)
+	@rm -rf $(DB_DATA_DIR)
+	@mkdir -p $(WP_DATA_DIR)
+	@mkdir -p $(DB_DATA_DIR)
+	@echo "$(GREEN)Data directories cleaned.$(X)"
+
 clean: down
 	@echo "$(BLUE)Cleaning Docker system...$(X)"
 	@docker system prune -a --force
-	@echo "$(BLUE)Removing data...$(X)"
+	@echo "$(BLUE)Removing data contents...$(X)"
 	@rm -rf $(WP_DATA_DIR)/*
 	@rm -rf $(DB_DATA_DIR)/*
 	@echo "$(GREEN)Clean complete.$(X)"
+
+deepclean: down
+	@echo "$(BLUE)Cleaning Docker system...$(X)"
+	@docker system prune -a --force
+	@echo "$(RED)Removing entire data directory...$(X)"
+	@rm -rf $(DATA_DIR)
+	@echo "$(GREEN)Deep clean complete.$(X)"
 
 fclean: clean
 	@echo "$(BLUE)Removing Docker volumes...$(X)"
@@ -143,12 +158,19 @@ stop:
 	@echo "$(GREEN)Containers stopped.$(X)"
 
 prune:
-	@echo "$(RED)WARNING: This will remove all unused containers, networks, and volumes.$(X)"
+	@echo "$(RED)WARNING: This will remove all unused containers, networks, volumes, and all data.$(X)"
 	@echo "$(RED)Are you sure? [y/N]$(X)"
 	@read -r answer; \
 	if [ "$$answer" = "y" ] || [ "$$answer" = "Y" ]; then \
+		echo "$(BLUE)Stopping containers...$(X)"; \
+		docker-compose -f $(DOCKER_COMPOSE) down --volumes; \
+		echo "$(BLUE)Cleaning Docker system...$(X)"; \
 		docker system prune -a --volumes --force; \
-		echo "$(GREEN)Prune complete.$(X)"; \
+		echo "$(BLUE)Removing entire data directory...$(X)"; \
+		rm -rf $(DATA_DIR); \
+		mkdir -p $(WP_DATA_DIR); \
+		mkdir -p $(DB_DATA_DIR); \
+		echo "$(GREEN)Prune complete. All data has been removed.$(X)"; \
 	else \
 		echo "$(BLUE)Prune cancelled.$(X)"; \
 	fi
