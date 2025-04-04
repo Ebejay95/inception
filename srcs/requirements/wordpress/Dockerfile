@@ -18,3 +18,5 @@ COPY ./tools/wp-config.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/wp-config.sh
 
 CMD ["/usr/local/bin/wp-config.sh"]
+
+USER www-data
