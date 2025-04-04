@@ -14,3 +14,5 @@ RUN mkdir -p /var/run/mysqld && \
 EXPOSE 3306
 
 CMD ["/usr/local/bin/init-db.sh"]
+
+USER mysql
