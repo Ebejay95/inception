@@ -17,6 +17,4 @@ RUN mkdir -p /var/log/nginx /var/cache/nginx /var/run/nginx && \
 
 EXPOSE 443
 
-USER nginx
-
 CMD ["nginx", "-g", "daemon off;"]
