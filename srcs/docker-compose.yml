@@ -86,6 +86,6 @@ volumes:
     name: mariadb
     driver: local
     driver_opts:
-      device: /home/jeberle/dockervolumes/inception/mariadb
+      device: /home/vboxuser/dockervolumes/inception/mariadb
       o: bind
       type: none
