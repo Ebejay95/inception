@@ -9,7 +9,7 @@ services:
     ports:
       - "443:443"
     volumes:
-      - vol_nginx_wordpress:/var/www/html
+      - vol_nginx_wordpress:/var/www/html:ro
     networks:
       - inception_network
     environment:
@@ -17,11 +17,11 @@ services:
     depends_on:
       - wordpress
     restart: on-failure
-  healthcheck:
-    test: ["CMD", "curl", "--fail", "https://localhost/wp-admin/" "--insecure" || "exit 1"]
-    interval: 10s
-    timeout: 5s
-    retries: 3
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "https://localhost/wp-admin/", "--insecure", "||", "exit", "1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   wordpress:
     image: wordpress
@@ -49,11 +49,11 @@ services:
       - wp_admin_password
       - wp_user_password
     restart: on-failure
-  healthcheck:
-    test: ["CMD", "php", "-f", "/var/www/html/wp-includes/version.php"]
-    interval: 10s
-    timeout: 5s
-    retries: 3
+    healthcheck:
+      test: ["CMD", "php", "-f", "/var/www/html/wp-includes/version.php"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   mariadb:
     image: mariadb
@@ -97,10 +97,10 @@ volumes:
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: '/home/jeberle/data'
+      device: '/home/jeberle/data/wordpress/'
   vol_mariadb:
     driver: local
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: '/home/jeberle/data'
+      device: '/home/jeberle/data/mariadb/'

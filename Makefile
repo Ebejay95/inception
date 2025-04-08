@@ -6,7 +6,7 @@
 #    By: jeberle <jeberle@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 15:44:57 by jeberle           #+#    #+#              #
-#    Updated: 2025/04/08 14:29:33 by jeberle          ###   ########.fr        #
+#    Updated: 2025/04/08 22:30:42 by jeberle          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -40,48 +40,20 @@ $(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█
 NAME=inception
 DOCKER_COMPOSE = srcs/docker-compose.yml
 
-DATA_DIR = ./srcs/data
+DATA_DIR = /home/jeberle/data
 
 WP_DATA_DIR = $(DATA_DIR)/wordpress
 DB_DATA_DIR = $(DATA_DIR)/mariadb
 
 #------------------------------------------------------------------------------#
-#--------------                       FLAGS                       -------------#
+#--------------                  DOCKER COMMANDS                  -------------#
 #------------------------------------------------------------------------------#
 
-#------------------------------------------------------------------------------#
-#--------------                        DIR                        -------------#
-#------------------------------------------------------------------------------#
-
-#------------------------------------------------------------------------------#
-#--------------                        LIBS                       -------------#
-#------------------------------------------------------------------------------#
-
-#------------------------------------------------------------------------------#
-#--------------                        SRC                        -------------#
-#------------------------------------------------------------------------------#
-
-#------------------------------------------------------------------------------#
-#--------------                      OBJECTS                      -------------#
-#------------------------------------------------------------------------------#
-
-#------------------------------------------------------------------------------#
-#--------------                      COMPILE                      -------------#
-#------------------------------------------------------------------------------#
-
-.PHONY: all setup prepare build up down ps logs status clean fclean re restart stop prune volumes images info check-env deepclean cleandata
+.PHONY: all build up down logs status clean fclean re stop prune
 
 all: prepare build up
 	@echo "$(GREEN)$(SUCCESS)$(X)"
 	@echo "$(GREEN)Inception is now running!$(X)"
-
-prepare:
-	@echo "$(BLUE)Creating data directories...$(X)"
-	@echo "$(BLUE)$(WP_DATA_DIR)$(X)"
-	@echo "$(BLUE)$(DB_DATA_DIR)$(X)"
-	@mkdir -p $(WP_DATA_DIR)
-	@mkdir -p $(DB_DATA_DIR)
-	@echo "$(GREEN)Data directories created at $(DATA_DIR)$(X)"
 
 build:
 	@echo "$(BLUE)Building Docker containers...$(X)"
@@ -98,10 +70,6 @@ down:
 	@DATA_DIR=$(DATA_DIR) docker-compose -f $(DOCKER_COMPOSE) down
 	@echo "$(GREEN)Containers stopped.$(X)"
 
-ps:
-	@echo "$(BLUE)List of running containers:$(X)"
-	@DATA_DIR=$(DATA_DIR) docker-compose -f $(DOCKER_COMPOSE) ps
-
 logs:
 	@echo "$(BLUE)Showing logs:$(X)"
 	@DATA_DIR=$(DATA_DIR) docker-compose -f $(DOCKER_COMPOSE) logs
@@ -109,22 +77,6 @@ logs:
 logs-%:
 	@echo "$(BLUE)Showing logs for $*:$(X)"
 	@DATA_DIR=$(DATA_DIR) docker-compose -f $(DOCKER_COMPOSE) logs $*
-
-status:
-	@echo "$(BLUE)Checking status:$(X)"
-	@docker ps -a
-	@echo "\n$(BLUE)Networks:$(X)"
-	@docker network ls
-	@echo "\n$(BLUE)Volumes:$(X)"
-	@docker volume ls
-
-cleandata:
-	@echo "$(BLUE)Removing data and recreating empty directories...$(X)"
-	@rm -rf $(WP_DATA_DIR)
-	@rm -rf $(DB_DATA_DIR)
-	@mkdir -p $(WP_DATA_DIR)
-	@mkdir -p $(DB_DATA_DIR)
-	@echo "$(GREEN)Data directories cleaned.$(X)"
 
 clean: down
 	@echo "$(BLUE)Cleaning Docker system...$(X)"
@@ -134,24 +86,12 @@ clean: down
 	@rm -rf $(DB_DATA_DIR)/*
 	@echo "$(GREEN)Clean complete.$(X)"
 
-deepclean: down
-	@echo "$(BLUE)Cleaning Docker system...$(X)"
-	@docker system prune -a --force
-	@echo "$(RED)Removing entire data directory...$(X)"
-	@rm -rf $(DATA_DIR)
-	@echo "$(GREEN)Deep clean complete.$(X)"
-
 fclean: clean
 	@echo "$(BLUE)Removing Docker volumes...$(X)"
 	@docker volume rm $$(docker volume ls -q) 2 || true
 	@echo "$(GREEN)Full clean complete.$(X)"
 
 re: fclean all
-
-restart:
-	@echo "$(BLUE)Restarting containers...$(X)"
-	@DATA_DIR=$(DATA_DIR) docker-compose -f $(DOCKER_COMPOSE) restart
-	@echo "$(GREEN)Containers restarted.$(X)"
 
 stop:
 	@echo "$(BLUE)Stopping containers...$(X)"
@@ -174,29 +114,7 @@ prune:
 		echo "$(BLUE)Prune cancelled.$(X)"; \
 	fi
 
-volumes:
-	@echo "$(BLUE)Docker volumes:$(X)"
-	@docker volume ls
-
-images:
-	@echo "$(BLUE)Docker images:$(X)"
-	@docker images
-
-info:
-	@echo "$(CYAN)INCEPTION PROJECT INFO:$(X)"
-	@echo "$(BLUE)Container statuses:$(X)"
-	@docker ps -a | grep -E 'nginx|wordpress|mariadb' || echo "No containers running"
-	@echo "\n$(BLUE)Volumes:$(X)"
-	@docker volume ls
-	@echo "\n$(BLUE)Networks:$(X)"
-	@docker network ls | grep inception || echo "No inception networks found"
-	@echo "\n$(BLUE)Data directory:$(X)"
-	@echo "$(DATA_DIR)"
-
-check-env:
-	@echo "$(BLUE)Checking environment files...$(X)"
-	@if [ -f srcs/.env ]; then \
-		echo "$(GREEN).env file exists.$(X)"; \
-	else \
-		echo "$(RED).env file is missing!$(X)"; \
-	fi
+prepare:
+	@mkdir $(DATA_DIR)
+	@mkdir $(WP_DATA_DIR)
+	@mkdir $(DB_DATA_DIR)
