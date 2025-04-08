@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Secrets als Umgebungsvariablen einlesen
 MYSQL_PASSWORD=$(cat /run/secrets/db_password)
 MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 
@@ -26,7 +27,8 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 		mysql -e "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};"
 
 		echo "Creating user: ${MYSQL_USER}"
-		mysql -e "CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';"
+		# Wichtige Änderung hier - '%' erlaubt Verbindungen von überall
+		mysql -e "CREATE USER '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';"
 		mysql -e "GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';"
 
 		echo "Setting root password"
