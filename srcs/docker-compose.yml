@@ -1,8 +1,11 @@
+name: inception
+
 services:
   nginx:
+    image: nginx
+    container_name: nginx
     build:
       context: ./requirements/nginx
-    container_name: nginx
     ports:
       - "443:443"
     volumes:
@@ -13,12 +16,18 @@ services:
       - DOMAIN_NAME=${DOMAIN_NAME}
     depends_on:
       - wordpress
-    restart: unless-stopped
+    restart: on-failure
+  healthcheck:
+    test: ["CMD", "curl", "--fail", "https://localhost/wp-admin/" "--insecure" || "exit 1"]
+    interval: 10s
+    timeout: 5s
+    retries: 3
 
   wordpress:
+    image: wordpress
+    container_name: wordpress
     build:
       context: ./requirements/wordpress
-    container_name: wordpress
     volumes:
       - vol_nginx_wordpress:/var/www/html
     networks:
@@ -39,12 +48,18 @@ services:
       - db_root_password
       - wp_admin_password
       - wp_user_password
-    restart: unless-stopped
+    restart: on-failure
+  healthcheck:
+    test: ["CMD", "php", "-f", "/var/www/html/wp-includes/version.php"]
+    interval: 10s
+    timeout: 5s
+    retries: 3
 
   mariadb:
+    image: mariadb
+    container_name: mariadb
     build:
       context: ./requirements/mariadb
-    container_name: mariadb
     secrets:
       - db_password
       - db_root_password
@@ -55,7 +70,7 @@ services:
       - vol_mariadb:/var/lib/mysql
     networks:
       - inception_network
-    restart: unless-stopped
+    restart: on-failure
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "--silent"]
       interval: 10s
@@ -78,4 +93,14 @@ networks:
 
 volumes:
   vol_nginx_wordpress:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/jeberle/data'
   vol_mariadb:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/jeberle/data'
