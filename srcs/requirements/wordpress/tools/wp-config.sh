@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# Logdatei einrichten
 LOG_FILE="/var/log/wordpress-init.log"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "$(date): Starting WordPress configuration script"
 
-# Secrets als Umgebungsvariablen einlesen
 echo "$(date): Reading secrets"
 MYSQL_PASSWORD=$(cat /run/secrets/db_password)
 echo "$(date): MYSQL_PASSWORD read (not showing for security)"
@@ -21,12 +19,9 @@ echo "$(date): WP_TITLE=${WP_TITLE}"
 echo "$(date): MYSQL_DATABASE=${MYSQL_DATABASE}"
 echo "$(date): MYSQL_USER=${MYSQL_USER}"
 
-# Function to check MariaDB availability
 check_mariadb() {
-    # Try using mysqladmin to check if the server is up
     if mysqladmin ping -h mariadb --silent 2>/dev/null; then
         return 0
-    # If nc is available, use it as a quick check
     elif command -v nc >/dev/null 2>&1 && nc -z mariadb 3306 2>/dev/null; then
         if mysqladmin ping -h mariadb --silent 2>/dev/null; then
             return 0
@@ -35,21 +30,18 @@ check_mariadb() {
     return 1
 }
 
-# Function to wait for MariaDB to be up and create the database
 wait_for_mariadb_and_setup() {
     local count=0
     local max_attempts=120
 
     echo "$(date): Waiting for MariaDB..."
 
-    # Check if nc is available
     if command -v nc >/dev/null 2>&1; then
         echo "$(date): Using nc to check for MariaDB availability"
     else
         echo "$(date): nc command not found, using alternative check method"
     fi
 
-    # Wait for database to be available
     while [ $count -lt $max_attempts ]; do
         count=$((count + 1))
         echo "$(date): Waiting for MariaDB... attempt $count/$max_attempts"
@@ -68,12 +60,10 @@ wait_for_mariadb_and_setup() {
         fi
     done
 
-    # Test database connection
     echo "$(date): Testing database connection..."
     if mysql -h mariadb -u "${MYSQL_USER}" -p"${MYSQL_PASSWORD}" -e "SHOW DATABASES;" 2>/dev/null; then
         echo "$(date): Successfully connected to MariaDB"
 
-        # Check if WordPress database exists
         if mysql -h mariadb -u "${MYSQL_USER}" -p"${MYSQL_PASSWORD}" -e "SHOW DATABASES LIKE '${MYSQL_DATABASE}';" 2>/dev/null | grep -q "${MYSQL_DATABASE}"; then
             echo "$(date): Database ${MYSQL_DATABASE} exists"
         else
@@ -93,10 +83,8 @@ wait_for_mariadb_and_setup() {
                 echo "$(date): Failed to create database. Waiting for MariaDB to be fully ready..."
                 sleep 5
 
-                # Check if MariaDB is still available
                 if ! check_mariadb; then
                     echo "$(date): MariaDB connection lost. Waiting for it to come back..."
-                    # Wait for MariaDB to come back
                     inner_count=0
                     inner_max=30
                     while [ $inner_count -lt $inner_max ]; do
@@ -111,7 +99,6 @@ wait_for_mariadb_and_setup() {
                 fi
             done
 
-            # Final attempt to check if database exists (it might have been created by MariaDB's init script)
             if mysql -h mariadb -u "${MYSQL_USER}" -p"${MYSQL_PASSWORD}" -e "SHOW DATABASES LIKE '${MYSQL_DATABASE}';" 2>/dev/null | grep -q "${MYSQL_DATABASE}"; then
                 echo "$(date): Database ${MYSQL_DATABASE} now exists"
                 return 0
@@ -128,10 +115,8 @@ wait_for_mariadb_and_setup() {
     return 0
 }
 
-# Wait for MariaDB and set up the database
 wait_for_mariadb_and_setup
 
-# Set up WordPress
 if [ ! -f /var/www/html/wp-config.php ] && [ ! -f /var/www/html/index.php ]; then
     echo "$(date): WordPress files not found. Downloading WordPress..."
     cd /var/www/html
@@ -140,12 +125,10 @@ if [ ! -f /var/www/html/wp-config.php ] && [ ! -f /var/www/html/index.php ]; the
     echo "$(date): Setting permissions"
     chown -R www-data:www-data /var/www/html
 
-    # Wait again for the database before proceeding with WordPress installation
     echo "$(date): Ensuring database is ready before WordPress installation..."
     wait_for_mariadb_and_setup
 
     echo "$(date): Creating wp-config.php..."
-    # Retry mechanism for wp-config creation
     config_attempts=0
     max_config_attempts=10
 
@@ -172,7 +155,6 @@ if [ ! -f /var/www/html/wp-config.php ] && [ ! -f /var/www/html/index.php ]; the
         echo "$(date): ERROR - Failed to create wp-config.php after $max_config_attempts attempts."
         echo "$(date): Creating wp-config.php manually..."
 
-        # Create wp-config.php manually as fallback
         cat > /var/www/html/wp-config.php <<EOF
 <?php
 define( 'DB_NAME', '${MYSQL_DATABASE}' );
@@ -204,19 +186,17 @@ EOF
         echo "$(date): Created wp-config.php manually."
     fi
 
-    # Wait once more to ensure database is ready for WordPress installation
     echo "$(date): Final check to ensure database is ready before WordPress installation..."
     wait_for_mariadb_and_setup
 
     echo "$(date): Installing WordPress core..."
     install_attempts=0
-    max_install_attempts=10  # Increased from 5
+    max_install_attempts=10
 
     while [ $install_attempts -lt $max_install_attempts ]; do
         install_attempts=$((install_attempts + 1))
         echo "$(date): Installing WordPress core (attempt $install_attempts/$max_install_attempts)..."
 
-        # Check if the database exists and is accessible before attempting installation
         if mysql -h mariadb -u "${MYSQL_USER}" -p"${MYSQL_PASSWORD}" -e "USE ${MYSQL_DATABASE};" 2>/dev/null; then
             echo "$(date): Database ${MYSQL_DATABASE} is accessible."
 
@@ -237,7 +217,7 @@ EOF
             echo "$(date): Database ${MYSQL_DATABASE} is not accessible. Waiting for it to be ready..."
         fi
 
-        sleep 5  # Longer wait between installation attempts
+        sleep 5
     done
 
     if [ $install_attempts -ge $max_install_attempts ]; then
@@ -261,7 +241,6 @@ else
     echo "$(date): WordPress already configured."
 fi
 
-# Final permission check
 chown -R www-data:www-data /var/www/html
 find /var/www/html -type d -exec chmod 755 {} \;
 find /var/www/html -type f -exec chmod 644 {} \;

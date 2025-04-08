@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# Logdatei einrichten
 LOG_FILE="/var/log/mariadb-init.log"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "$(date): Starting MariaDB initialization script"
 
-# Secrets als Umgebungsvariablen einlesen
 echo "$(date): Reading secrets"
 MYSQL_PASSWORD=$(cat /run/secrets/db_password)
 echo "$(date): MYSQL_PASSWORD read (not showing for security)"
@@ -15,7 +13,6 @@ echo "$(date): MYSQL_ROOT_PASSWORD read (not showing for security)"
 echo "$(date): MYSQL_DATABASE=${MYSQL_DATABASE}"
 echo "$(date): MYSQL_USER=${MYSQL_USER}"
 
-# Ensure proper permissions on data directory
 chown -R mysql:mysql /var/lib/mysql
 chmod -R 755 /var/lib/mysql
 
@@ -44,7 +41,6 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
         mysql -e "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};"
 
         echo "$(date): Creating user: ${MYSQL_USER}"
-        # Create user with wildcard host (%) to allow connections from anywhere
         mysql -e "CREATE USER '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';"
         mysql -e "CREATE USER '${MYSQL_USER}'@'localhost' IDENTIFIED BY '${MYSQL_PASSWORD}';"
 
@@ -58,11 +54,9 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
         echo "$(date): Flushing privileges"
         mysql -e "FLUSH PRIVILEGES;"
 
-        # List all users to verify
         echo "$(date): Verifying users:"
         mysql -e "SELECT User, Host FROM mysql.user;"
 
-        # List all databases to verify
         echo "$(date): Verifying databases:"
         mysql -e "SHOW DATABASES;"
 
@@ -71,19 +65,16 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
         wait $MYSQLD_PID
     else
         echo "$(date): ERROR - MariaDB did not start properly. Skipping database setup."
-        # Try to kill the MySQL process if it's still running
         kill $MYSQLD_PID 2>/dev/null || true
     fi
 else
     echo "$(date): MariaDB data directory already initialized."
     echo "$(date): Checking existing configuration:"
 
-    # Start MariaDB directly without using service
     echo "$(date): Starting MariaDB temporarily for checks..."
     mysqld --user=mysql &
     MYSQLD_PID=$!
 
-    # Wait for MySQL to be ready
     for i in {1..30}; do
         if mysqladmin ping >/dev/null 2>&1; then
             echo "$(date): MariaDB is ready after $i attempts."
@@ -93,7 +84,6 @@ else
         sleep 1
     done
 
-    # Try to connect as root and list users
     echo "$(date): Trying to check users with root:"
     if mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "SELECT User, Host FROM mysql.user;" 2>/dev/null; then
         echo "$(date): Successfully connected as root"
@@ -101,12 +91,10 @@ else
         echo "$(date): Failed to connect as root"
     fi
 
-    # Try to connect as WordPress user
     echo "$(date): Trying to check access with WordPress user:"
     if mysql -u "${MYSQL_USER}" -p"${MYSQL_PASSWORD}" -e "SHOW DATABASES;" 2>/dev/null; then
         echo "$(date): Successfully connected as ${MYSQL_USER}"
 
-        # Check if the WordPress database exists
         if mysql -u "${MYSQL_USER}" -p"${MYSQL_PASSWORD}" -e "SHOW DATABASES LIKE '${MYSQL_DATABASE}';" 2>/dev/null | grep -q "${MYSQL_DATABASE}"; then
             echo "$(date): ${MYSQL_DATABASE} database exists."
         else
@@ -119,7 +107,6 @@ else
     else
         echo "$(date): Failed to connect as wp_user"
 
-        # Fix user permissions
         echo "$(date): Fixing user permissions..."
         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';" 2>/dev/null
         mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};" 2>/dev/null
@@ -129,13 +116,11 @@ else
         echo "$(date): User permissions updated."
     fi
 
-    # Stop the temporary MySQL service
     echo "$(date): Stopping temporary MariaDB instance..."
     kill $MYSQLD_PID
     wait $MYSQLD_PID || true
 fi
 
-# Ensure proper permissions before starting
 chown -R mysql:mysql /var/lib/mysql
 chmod -R 755 /var/lib/mysql
 
