@@ -6,7 +6,7 @@
 #    By: jeberle <jeberle@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 15:44:57 by jeberle           #+#    #+#              #
-#    Updated: 2025/04/08 11:05:11 by jeberle          ###   ########.fr        #
+#    Updated: 2025/04/08 14:29:33 by jeberle          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -143,7 +143,7 @@ deepclean: down
 
 fclean: clean
 	@echo "$(BLUE)Removing Docker volumes...$(X)"
-	@docker volume rm $$(docker volume ls -q) 2>/dev/null || true
+	@docker volume rm $$(docker volume ls -q) 2 || true
 	@echo "$(GREEN)Full clean complete.$(X)"
 
 re: fclean all
