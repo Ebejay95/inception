@@ -6,7 +6,7 @@
 #    By: jeberle <jeberle@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 15:44:57 by jeberle           #+#    #+#              #
-#    Updated: 2025/04/07 16:42:52 by jeberle          ###   ########.fr        #
+#    Updated: 2025/04/08 09:02:42 by jeberle          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -40,7 +40,7 @@ $(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█$(X)$(CYAN)█$(X)$(BLUE)█
 NAME=inception
 DOCKER_COMPOSE = srcs/docker-compose.yml
 
-DATA_DIR = /home/vboxuser/dockervolumes/inception/
+DATA_DIR = ./srcs/data
 
 WP_DATA_DIR = $(DATA_DIR)/wordpress
 DB_DATA_DIR = $(DATA_DIR)/mariadb
