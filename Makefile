@@ -6,7 +6,7 @@
 #    By: jeberle <jeberle@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 15:44:57 by jeberle           #+#    #+#              #
-#    Updated: 2025/04/08 09:02:42 by jeberle          ###   ########.fr        #
+#    Updated: 2025/04/08 09:53:49 by jeberle          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -166,9 +166,7 @@ prune:
 		echo "$(BLUE)Cleaning Docker system...$(X)"; \
 		docker system prune -a --volumes --force; \
 		echo "$(BLUE)Removing entire data directory...$(X)"; \
-		rm -rf $(DATA_DIR); \
-		mkdir -p $(WP_DATA_DIR); \
-		mkdir -p $(DB_DATA_DIR); \
+		sudo rm -rf $(DATA_DIR); \
 		echo "$(GREEN)Prune complete. All data has been removed.$(X)"; \
 	else \
 		echo "$(BLUE)Prune cancelled.$(X)"; \
