@@ -6,7 +6,7 @@
 #    By: jeberle <jeberle@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 15:44:57 by jeberle           #+#    #+#              #
-#    Updated: 2025/04/08 09:53:49 by jeberle          ###   ########.fr        #
+#    Updated: 2025/04/08 09:57:55 by jeberle          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -77,6 +77,8 @@ all: prepare build up
 
 prepare:
 	@echo "$(BLUE)Creating data directories...$(X)"
+	@echo "$(BLUE)$(WP_DATA_DIR)$(X)"
+	@echo "$(BLUE)$(DB_DATA_DIR)$(X)"
 	@mkdir -p $(WP_DATA_DIR)
 	@mkdir -p $(DB_DATA_DIR)
 	@echo "$(GREEN)Data directories created at $(DATA_DIR)$(X)"
