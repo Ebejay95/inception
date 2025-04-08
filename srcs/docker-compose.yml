@@ -9,6 +9,8 @@ services:
       - vol_nginx_wordpress:/var/www/html
     networks:
       - inception_network
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
     depends_on:
       - wordpress
     restart: unless-stopped
