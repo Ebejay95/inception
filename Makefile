@@ -6,7 +6,7 @@
 #    By: jeberle <jeberle@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 15:44:57 by jeberle           #+#    #+#              #
-#    Updated: 2025/04/08 22:30:42 by jeberle          ###   ########.fr        #
+#    Updated: 2025/04/09 09:36:47 by jeberle          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -115,6 +115,6 @@ prune:
 	fi
 
 prepare:
-	@mkdir $(DATA_DIR)
-	@mkdir $(WP_DATA_DIR)
-	@mkdir $(DB_DATA_DIR)
+	@[ -d "$(DATA_DIR)" ] || mkdir -p "$(DATA_DIR)"
+	@[ -d "$(WP_DATA_DIR)" ] || mkdir -p "$(WP_DATA_DIR)"
+	@[ -d "$(DB_DATA_DIR)" ] || mkdir -p "$(DB_DATA_DIR)"
