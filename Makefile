@@ -6,7 +6,7 @@
 #    By: jeberle <jeberle@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 15:44:57 by jeberle           #+#    #+#              #
-#    Updated: 2025/04/09 09:36:47 by jeberle          ###   ########.fr        #
+#    Updated: 2025/04/09 17:18:48 by jeberle          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -81,9 +81,6 @@ logs-%:
 clean: down
 	@echo "$(BLUE)Cleaning Docker system...$(X)"
 	@docker system prune -a --force
-	@echo "$(BLUE)Removing data contents...$(X)"
-	@rm -rf $(WP_DATA_DIR)/*
-	@rm -rf $(DB_DATA_DIR)/*
 	@echo "$(GREEN)Clean complete.$(X)"
 
 fclean: clean

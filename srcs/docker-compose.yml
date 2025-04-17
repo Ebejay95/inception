@@ -11,7 +11,7 @@ services:
     volumes:
       - vol_nginx_wordpress:/var/www/html:ro
     networks:
-      - inception_network
+      - docker_net
     environment:
       - DOMAIN_NAME=${DOMAIN_NAME}
     depends_on:
@@ -31,7 +31,7 @@ services:
     volumes:
       - vol_nginx_wordpress:/var/www/html
     networks:
-      - inception_network
+      - docker_net
     depends_on:
       - mariadb
     environment:
@@ -69,7 +69,7 @@ services:
     volumes:
       - vol_mariadb:/var/lib/mysql
     networks:
-      - inception_network
+      - docker_net
     restart: on-failure
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "--silent"]
@@ -88,7 +88,7 @@ secrets:
     file: ./secrets/wp_user_password.txt
 
 networks:
-  inception_network:
+  docker_net:
     driver: bridge
 
 volumes:
