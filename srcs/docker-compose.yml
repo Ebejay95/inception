@@ -101,11 +101,11 @@ volumes:
       type: 'none'
       o: 'bind'
       device: '${HOME}/data/wordpress/'
-    name: "inception_wordpress"
+    name: "inception_vol_nginx_wordpress"
   vol_mariadb:
     driver: local
     driver_opts:
       type: 'none'
       o: 'bind'
       device: '${HOME}/data/mariadb/'
-    name: "inception_mariadb"
+    name: "inception_vol_mariadb"
